@@ -10,12 +10,33 @@
 #include <lwip/netif.h>
 #include <lwip/dns.h>
 #include <lwip/inet.h>  // Add this header for AF_INET
+#include "myutils/utils.h"
 
 // #define WIFI_SSID "your_SSID"
 // #define WIFI_PASSWORD "your_PASSWORD"
 #define MULTICAST_IP "239.255.255.250"
 #define MULTICAST_PORT 1900
 // #include "utils/utils.h"
+
+void udp_recv_callback(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *addr, u16_t port) {
+    if (p != NULL) {
+        printf("Received packet from %s:%d\n", ipaddr_ntoa(addr), port);
+        printf("Data: %.*s\n", p->len, (char *)p->payload);
+        
+        // Free the pbuf to avoid memory leaks
+        pbuf_free(p);
+    }
+}
+
+void read_udp_message(){
+    struct udp_pcb *pcb = udp_new();
+
+    if (!pcb) {
+        printf("Failed to create PCB\n");
+        return;
+    }
+    udp_recv(pcb, &udp_recv_callback, NULL);
+}
 
 void send_multicast_message() {
     struct udp_pcb *pcb = udp_new();
@@ -51,8 +72,11 @@ int main()
 {
     stdio_init_all();
 
-    // int x = subtract(10, 2); y
+    int x = subtract(10, 2); 
+    int y = x -1;
+    int z = 2;
 
+    printf("X: %i\n", x);
     // Initialise the Wi-Fi chip
     if (cyw43_arch_init())
     {

@@ -167,3 +167,6 @@
 /home/micha/pi_pico/pico/micha/distance_sensor_3/build/pico-sdk/src/rp2040/hardware_structs/CMakeFiles/rebuild_cache.dir
 /home/micha/pi_pico/pico/micha/distance_sensor_3/build/pico-sdk/docs/CMakeFiles/edit_cache.dir
 /home/micha/pi_pico/pico/micha/distance_sensor_3/build/pico-sdk/docs/CMakeFiles/rebuild_cache.dir
+/home/micha/pi_pico/pico/micha/distance_sensor_3/build/myutils/CMakeFiles/myutils.dir
+/home/micha/pi_pico/pico/micha/distance_sensor_3/build/myutils/CMakeFiles/edit_cache.dir
+/home/micha/pi_pico/pico/micha/distance_sensor_3/build/myutils/CMakeFiles/rebuild_cache.dir

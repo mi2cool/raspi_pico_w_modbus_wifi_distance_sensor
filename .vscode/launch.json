@@ -10,6 +10,10 @@
             "servertype": "openocd",
             "gdbPath": "gdb",
             "device": "RP2040",
+            "liveWatch": {
+                "enabled": true,
+                "samplesPerSecond": 4
+            },
             "configFiles": [
                 "raspberrypi-swd.cfg",
                 "target/rp2040.cfg"

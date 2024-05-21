@@ -39,24 +39,18 @@ project(distance_sensor_3 C CXX ASM)
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
-
-add_executable(distance_sensor_3 distance_sensor_3.c )
+add_subdirectory(myutils)
+add_executable(distance_sensor_3 distance_sensor_3.c)
 
 pico_set_program_name(distance_sensor_3 "distance_sensor_3")
 pico_set_program_version(distance_sensor_3 "0.1")
 
-# micha: add utils lib
-# add_library(utils utils.cpp)
-# add_subdirectory(utils)
-
 # Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(distance_sensor_3 1)
-pico_enable_stdio_usb(distance_sensor_3 0)
+pico_enable_stdio_uart(distance_sensor_3 0)
+pico_enable_stdio_usb(distance_sensor_3 1)
 
 # Add the standard library to the build
-target_link_libraries(distance_sensor_3
-        pico_stdlib
-        )
+target_link_libraries(distance_sensor_3 pico_stdlib myutils pico_cyw43_arch_lwip_threadsafe_background)
 
 # Add the standard include files to the build
 target_include_directories(distance_sensor_3 PRIVATE
@@ -65,11 +59,10 @@ target_include_directories(distance_sensor_3 PRIVATE
 )
 
 # Add any user requested libraries
-target_link_libraries(
-  distance_sensor_3 
-  pico_cyw43_arch_lwip_threadsafe_background
-  #lwip
-  )
+# target_link_libraries(
+#   distance_sensor_3 
+#   pico_cyw43_arch_lwip_threadsafe_background
+#   )
 
 pico_add_extra_outputs(distance_sensor_3)
 

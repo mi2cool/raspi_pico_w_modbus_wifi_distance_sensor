@@ -45,6 +45,9 @@
         "cyw43_driver.h": "c",
         "cyw43_configport.h": "c",
         "sockets.h": "c",
-        "inet.h": "c"
-    }
+        "inet.h": "c",
+        "string.h": "c",
+        "utils.h": "c"
+    },
+    "cortex-debug.variableUseNaturalFormat": true
 }
