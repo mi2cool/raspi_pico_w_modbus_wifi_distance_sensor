@@ -9,7 +9,7 @@
 #include <lwip/sys.h>
 #include <lwip/netif.h>
 #include <lwip/dns.h>
-#include <lwip/inet.h>  // Add this header for AF_INET
+#include <lwip/inet.h> // Add this header for AF_INET
 #include "myutils/utils.h"
 
 // #define WIFI_SSID "your_SSID"
@@ -18,29 +18,46 @@
 #define MULTICAST_PORT 1900
 // #include "utils/utils.h"
 
-void udp_recv_callback(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *addr, u16_t port) {
-    if (p != NULL) {
-        printf("Received packet from %s:%d\n", ipaddr_ntoa(addr), port);
-        printf("Data: %.*s\n", p->len, (char *)p->payload);
-        
-        // Free the pbuf to avoid memory leaks
-        pbuf_free(p);
-    }
+// void udp_recv_callback(void *arg, struct udp_pcb *pcb, struct pbuf *p, const ip_addr_t *addr, u16_t port) {
+//     printf("Callback");
+//     if (p != NULL) {
+//         printf("Received packet from %s:%d\n", ipaddr_ntoa(addr), port);
+//         printf("Data: %.*s\n", p->len, (char *)p->payload);
+
+//         // Free the pbuf to avoid memory leaks
+//         pbuf_free(p);
+//     }
+// }
+
+// void set_callback_func_on_udp_message_received_event(){
+//     struct udp_pcb *pcb = udp_new();
+
+//     if (!pcb) {
+//         printf("Failed to create PCB\n");
+//         return;
+//     }
+//     udp_recv(pcb, udp_recv_callback, NULL);
+// }
+
+void udp_receive_callback(void *arg,             // User argument - udp_recv `arg` parameter
+                          struct udp_pcb *upcb,  // Receiving Protocol Control Block
+                          struct pbuf *p,        // Pointer to Datagram
+                          const ip_addr_t *addr, // Address of sender
+                          u16_t port)            // Sender port
+{
+
+    // Process datagram here (non-blocking code)
+    printf("Callback");
+
+    // Must free receive pbuf before return
+    pbuf_free(p);
 }
 
-void read_udp_message(){
+void send_multicast_message()
+{
     struct udp_pcb *pcb = udp_new();
-
-    if (!pcb) {
-        printf("Failed to create PCB\n");
-        return;
-    }
-    udp_recv(pcb, &udp_recv_callback, NULL);
-}
-
-void send_multicast_message() {
-    struct udp_pcb *pcb = udp_new();
-    if (!pcb) {
+    if (!pcb)
+    {
         printf("Failed to create PCB\n");
         return;
     }
@@ -49,7 +66,8 @@ void send_multicast_message() {
     ipaddr_aton(MULTICAST_IP, &multicast_addr);
 
     struct pbuf *p = pbuf_alloc(PBUF_TRANSPORT, strlen("Hello, Multicast!"), PBUF_RAM);
-    if (!p) {
+    if (!p)
+    {
         printf("Failed to allocate pbuf\n");
         udp_remove(pcb);
         return;
@@ -58,9 +76,12 @@ void send_multicast_message() {
     memcpy(p->payload, "Hello, Multicast!", p->len);
 
     err_t err = udp_sendto(pcb, p, &multicast_addr, MULTICAST_PORT);
-    if (err != ERR_OK) {
+    if (err != ERR_OK)
+    {
         printf("Failed to send message: %d\n", err);
-    } else {
+    }
+    else
+    {
         printf("Message sent: Hello, Multicast!\n");
     }
 
@@ -72,8 +93,8 @@ int main()
 {
     stdio_init_all();
 
-    int x = subtract(10, 2); 
-    int y = x -1;
+    int x = subtract(10, 2);
+    int y = x - 1;
     int z = 2;
 
     printf("X: %i\n", x);
@@ -86,6 +107,8 @@ int main()
 
     // Enable wifi station
     cyw43_arch_enable_sta_mode();
+
+    sleep_ms(4000);
 
     printf("Connecting to Wi-Fi...\n");
     if (cyw43_arch_wifi_connect_timeout_ms("KaMi", "Kacki134!", CYW43_AUTH_WPA2_AES_PSK, 30000))
@@ -101,7 +124,16 @@ int main()
         printf("IP address %d.%d.%d.%d\n", ip_address[0], ip_address[1], ip_address[2], ip_address[3]);
     }
 
+    // set_callback_func_on_udp_message_received_event();
 
+        struct udp_pcb *pcb = udp_new();
+    if (!pcb)
+    {
+        printf("Failed to create PCB\n");
+        return -3;
+    }
+    udp_bind(pcb, IP_ADDR_ANY, 5800);
+    udp_recv(pcb, udp_receive_callback, NULL);
 
     while (true)
     {

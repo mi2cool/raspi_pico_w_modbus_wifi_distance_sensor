@@ -2,3 +2,6 @@ build/
 generated/
 CMakeFiles/
 elf2uf2/
+build/*.bin
+build/*.elf
+build/distance_sensor_3.hex
