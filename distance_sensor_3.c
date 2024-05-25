@@ -16,26 +16,25 @@
 
 // #define WIFI_SSID "your_SSID"
 // #define WIFI_PASSWORD "your_PASSWORD"
-#define MULTICAST_IP "239.255.255.250"
-#define MULTICAST_PORT 1900
 
 // global variables
 int watchdog_counter = 0;
-char* get_response_message(char *request_message)
+
+int create_response(char* request, char* response)
 {
-    char *response_message;
-    if ("*IDN?" == request_message)
+    char buffer[20];
+    if (strncmp("*IDN?", request, strlen("*IDN?"))==0)
     {
-        response_message = "Raspberry Pi Pico";
-    }
-    else if ("WATCHDOG:COUNTER?" == request_message)
+        strcpy(response, "IDN:");
+        strcat(response, "Raspberry Pi Pico");
+    }else if (strncmp("WATCHDOG_COUNTER?", request, strlen("WATCHDOG_COUNTER?"))==0)
     {
-        char s_watchdog_counter[7];
-        snprintf(s_watchdog_counter, sizeof(s_watchdog_counter), "%i", watchdog_counter);
-        strcpy(response_message, "WATCHDOG:COUNTER:");
-        strcpy(response_message, s_watchdog_counter);
+        strcpy(response, "WATCHDOG_COUNTER:");        
+        snprintf(buffer, sizeof(buffer), "%i", watchdog_counter);
+        strcat(response, buffer);        
     }
-    return response_message;
+    
+    return strlen(response);
 }
 
 void udp_receive_callback(void *arg,             // User argument - udp_recv `arg` parameter
@@ -50,128 +49,26 @@ void udp_receive_callback(void *arg,             // User argument - udp_recv `ar
     char request[4096];
     char response[4096];
 
-     memcpy(p->payload, request, p->len);
+    memset(request, 0, strlen(request));
+    memset(response, 0, strlen(response));
 
-     if(strncmp("IDN*?", request, strlen("IDN*?"))){
-        strcpy(response, "IDN:");
-        strcat(response, "Raspberry Pi Pico");
-     }
+    memcpy(request, p->payload, p->len);
+    printf("request: %s\n", request);
 
-    // snprintf(s_watchdog_counter, sizeof(s_watchdog_counter), "%i", watchdog_counter);
-    // strcpy(msg, "these ");
-    // strcat(msg, "strings ");
-    // strcat(msg, "are ");
-    // strcat(msg, "concatenated.");
-    // strcat(msg, s_watchdog_counter);
-    // memcpy(p->payload, msg, strlen(msg));
-    // p->len = strlen(msg);
-    // printf("Send: %s\n", msg);
+    // create the response message
+    int len_resp = create_response(request, response);
 
-    // p_tx = pbuf_alloc(PBUF_TRANSPORT, strlen(msg), PBUF_RAM);
-    // memcpy(p_tx->payload, msg, strlen(msg));
-    // p_tx->len = strlen(msg);
-
-    // err = udp_sendto(upcb, p_tx, addr, port);
-    // if (err != ERR_OK)
-    // {
-    //     printf("Error: udp_sendto() failed: %d\n", err);
-    // }
-    // else
-    // {
-    //     printf("Message sent.\n");
-    // }
-
-    // char *response = get_response_message(p->payload);
-    
-    
-    
-    // send_udp_response(response); //, p_tx, upcb, addr, port);
-    
-
-    printf("response: %s\n",response);
+    printf("response: %s\n", response);
     p_tx = pbuf_alloc(PBUF_TRANSPORT, strlen(response), PBUF_RAM);
+
+    // copy reponse data to tx buffer
     memcpy(p_tx->payload, response, strlen(response));
 
+    // send response
     err = udp_sendto(upcb, p_tx, addr, port);
 
     // Must free receive pbuf before return
     pbuf_free(p);
-}
-
-char* create_response(const char* request) {
-    // Define the prefix
-    const char* response = "";
-    
-    // Calculate the lengths
-    size_t input_len = strlen(response);
-    size_t total_len = input_len + 1; // +1 for the null terminator
-
-    if("*IDN" == request){
-        response = "*IDN:Raspberry Pi Pico";
-    }
-
-
-    // Allocate memory for the new string
-    char* result = (char*)malloc(total_len * sizeof(char));
-    if (result == NULL) {
-        fprintf(stderr, "Memory allocation failed\n");
-        exit(1);
-    }
-
-    // Copy the prefix to the result
-    strcpy(result, response);
-
-    // Concatenate the input string to the result
-    // strcat(result, input);
-
-    return result;
-}
-
-
-void send_udp_response(char *resp_msg) //,        // response message
-                    //    struct pbuf *p_tx,     // Tx buffer object
-                    //    struct udp_pcb *pcb,   // Receiving Protocol Control Block
-                    //    const ip_addr_t *addr, // Address of requester
-                    //    u16_t port)            // Port for response
-{
-    err_t err;
-    // snprintf(s_int_buffer, sizeof(s_int_buffer), "%i", watchdog_counter);
-    // strcat(resp_msg, s_int_buffer);
-    // strcpy(resp_msg, "*IDN:Raspberry Pi Pico:");
-    // strcpy(resp_msg, id);
-    // snprintf(s_int_buffer, sizeof(s_int_buffer), "%i", watchdog_counter);
-    // free(s_int_buffer);
-
-    // pcb = udp_new();
-    // if (!pcb)
-    // {
-    //     printf("Error: udp_new() failed.\n");
-    //     return;
-    // }
-
-    // if ("*IDN?")
-    // {
-    //     char id[255];
-    //     int len = strlen(id);
-
-    //     pico_get_unique_board_id_string(id, strlen(id));
-    //     strcpy(resp_msg, "*IDN:Raspberry Pi Pico:");
-    //     strcpy(resp_msg, id);
-    //     snprintf(s_int_buffer, sizeof(s_int_buffer), "%i", watchdog_counter);
-    //     strcat(resp_msg, s_int_buffer);
-    // }
-
-    // p_tx = pbuf_alloc(PBUF_TRANSPORT, strlen(resp_msg), PBUF_RAM);
-    // memcpy(p_tx->payload, resp_msg, strlen(resp_msg));
-    // // p_tx->len = strlen(msg);
-
-    // err = udp_sendto(pcb, p_tx, addr, port);
-
-    // // Free the pbuf
-    // pbuf_free(p);
-
-    // // Remove the PCB
-    // udp_remove(pcb);
 }
 
 int main()
@@ -206,8 +103,6 @@ int main()
     // Read the ip address in a human readable way
     uint8_t *ip_address = (uint8_t *)&(cyw43_state.netif[0].ip_addr.addr);
     printf("IP address %d.%d.%d.%d\n", ip_address[0], ip_address[1], ip_address[2], ip_address[3]);
-
-    // set_callback_func_on_udp_message_received_event();
 
     struct udp_pcb *pcb = udp_new();
     if (!pcb)
